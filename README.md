@@ -19,7 +19,23 @@ Clawtographer analyzes your codebase in parallel using local AI models and creat
 ### Prerequisites
 
 1. **Ollama** - Install from [ollama.ai](https://ollama.ai)
-2. **A local model** - Run: `ollama pull glm-4.7-flash`
+
+2. **A capable local model** - Clawtographer works with many models. Pick one:
+
+**Recommended for code analysis:**
+- `glm-4.7-flash` - Fast, excellent reasoning (4.7B params)
+- `qwen2.5-coder:14b` - Strong code analysis (14B params)
+- `qwen2.5-coder:32b` - Top-tier analysis if you have RAM (32B params)
+- `llama3.1:8b` - Solid general-purpose (8B params)
+- `llama3.1:70b` - Powerful if hardware allows (70B params)
+- `mistral:7b` - Good balance (7B params)
+- `mixtral:8x7b` - Excellent reasoning (47B params)
+- `deepseek-coder:6.7b` - Code-focused (6.7B params)
+
+**Install any with:** `ollama pull <model-name>`
+
+**Minimum recommendation:** Any model 7B+ parameters will work. Smaller models (1-3B) may produce less detailed analyses.
+
 3. **Python 3.8+** with pip
 
 ### Install Clawtographer
