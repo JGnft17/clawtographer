@@ -1,0 +1,26 @@
+{
+  "model_preference": "auto",
+  "max_tokens_per_chunk": 180000,
+  "max_parallel_agents": 3,
+  "output_format": "markdown",
+  "auto_confirm_cost_under": 0.50,
+  "ignore_patterns": [
+    ".git",
+    "__pycache__",
+    "node_modules",
+    ".next",
+    "dist",
+    "build",
+    ".venv",
+    "venv",
+    ".env",
+    ".pytest_cache",
+    ".mypy_cache",
+    "*.pyc",
+    "*.pyo",
+    "*.pyd",
+    ".DS_Store",
+    "*.egg-info",
+    ".eggs"
+  ]
+}
