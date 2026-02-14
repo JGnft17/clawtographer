@@ -1,35 +1,51 @@
+---
+name: clawtographer
+description: "Codebase cartographer - maps and documents codebases using parallel local LLM agents"
+---
+
 # Clawtographer Skill
 
-**Description:** Maps and documents codebases of any size using parallel LLM agents. Creates comprehensive architecture documentation.
+## Overview
+Clawtographer is a codebase mapping tool that generates comprehensive architecture documentation using parallel local LLM agents. It analyzes code structure, dependencies, and logic to create navigable codebase maps.
 
-## When to Use This Skill
+## When to Use Clawtographer
 
-Use Clawtographer when:
+Use Clawtographer whenever:
 - User asks to "map this codebase" or "document this project"
-- User wants to understand a large/complex codebase
-- Building something that requires understanding existing code structure
-- User mentions needing architecture documentation
-- Analyzing dependencies or data flows in a project
+- Understanding large/complex codebases
+- Building something requiring existing code structure knowledge
+- Architecture documentation needs
+- Analyzing dependencies/data flows
 
-DO NOT use for:
-- Single file analysis (just read the file directly)
-- Projects under 10 files (too small, not worth overhead)
-- When user just wants to read specific code (use regular file viewing)
+**Common triggers:**
+- "Map this codebase"
+- "Document this project's architecture"
+- "Help me understand how this code works"
+- "Create a codebase overview"
 
-## How It Works
+**DO NOT use for:**
+- Single file analysis
+- Projects under 10 files
+- Specific code reading (use regular file viewing)
 
-1. Scans codebase directory and counts tokens per file
-2. Splits files into chunks that fit in LLM context windows
-3. Spawns parallel LLM agents - each analyzes a chunk
-4. Synthesizes all analyses into comprehensive CODEBASE_MAP.md
-5. Saves to `docs/CODEBASE_MAP.md` in the target directory
+## What Clawtographer Does
 
-## Usage
+1. **Scans** codebase, counts tokens per file
+2. **Splits** files into chunks fitting LLM context windows
+3. **Spawns** parallel LLM agents analyzing chunks
+4. **Synthesizes** analyses into comprehensive CODEBASE_MAP.md
+5. **Saves** to `docs/CODEBASE_MAP.md`
+
+## How to Use Clawtographer
+
+### Basic Usage
 ```bash
-python3 ~/clawtographer/cartographer.py <codebase_path> [output_dir] [max_parallel]
+python3 ~/clawtographer/cartographer.py /path/to/codebase
 ```
 
-**Examples:**
+This creates `docs/CODEBASE_MAP.md` in the target directory.
+
+### Advanced Usage
 ```bash
 # Map current directory
 python3 ~/clawtographer/cartographer.py . docs 3
@@ -37,32 +53,31 @@ python3 ~/clawtographer/cartographer.py . docs 3
 # Map specific project
 python3 ~/clawtographer/cartographer.py /path/to/project
 
-# Use more parallel agents (faster but more API calls)
+# More parallel agents (faster, more compute)
 python3 ~/clawtographer/cartographer.py /path/to/project docs 5
 ```
 
-## Configuration
+### Configuration
 
-Edit `~/clawtographer/config.json` to set:
-- Preferred LLM model (auto-detects what's available)
-- Max tokens per chunk
-- Parallel agent limit
-- Output format preferences
+Edit `~/clawtographer/config.json`:
+```json
+{
+  "max_tokens_per_chunk": 180000,
+  "max_parallel_agents": 3,
+  "ignore_patterns": [".git", "node_modules", "*.pyc"]
+}
+```
 
 ## Model Selection Strategy
 
-Clawtographer automatically uses the best available model:
-
 **Priority order:**
 1. Local models (free): GLM, Qwen, Llama, Mistral
-2. Cloud models (if configured): Claude, OpenAI, Gemini
+2. Auto-detects available models
+3. Uses best available for code analysis
 
-**Cost management:**
-- Estimates cost BEFORE running (if using paid APIs)
-- Asks for confirmation if cost > $1
-- Defaults to local models when available
+**Cost:** Always FREE - uses local Ollama models only.
 
-## Output
+## Output Format
 
 Creates `docs/CODEBASE_MAP.md` containing:
 - Overview and architecture summary
@@ -71,57 +86,88 @@ Creates `docs/CODEBASE_MAP.md` containing:
 - Data flows and dependencies
 - Navigation guide for finding functionality
 
+## Integration with OpenClaw Workflow
+
+**Typical workflow:**
+1. User uploads codebase or references project path
+2. Agent runs Clawtographer to generate map
+3. Agent reads CODEBASE_MAP.md
+4. Agent can now navigate and work with the codebase intelligently
+
+**Example:**
+```
+User: Help me add a feature to this project
+Agent: [runs Clawtographer first]
+Agent: [reads CODEBASE_MAP.md to understand architecture]
+Agent: [makes informed changes in the right places]
+```
+
 ## Error Handling
 
 - Respects .gitignore patterns
 - Skips binary files automatically
 - Handles encoding errors gracefully
-- Saves progress (can resume if interrupted)
+- Saves progress (resume if interrupted)
 - Rate limiting for API calls
+
+## Performance Estimates
+
+**Small project (50 files, 50K tokens):**
+- Time: 2-5 minutes
+- Cost: FREE
+
+**Medium project (500 files, 500K tokens):**
+- Time: 10-20 minutes
+- Cost: FREE
+
+**Large project (2000+ files, 2M tokens):**
+- Time: 30-60 minutes
+- Cost: FREE
 
 ## Best Practices
 
-- Run on clean codebases (no build artifacts)
-- Use .gitignore to exclude unnecessary files
-- Start with 3 parallel agents, increase if needed
-- Review output and refine with follow-up questions
-- Update map when codebase changes significantly
+### When to Map a Codebase
+- Before making changes to unfamiliar code
+- When onboarding to a new project
+- Before architectural decisions
+- When documenting existing systems
 
-## Cost Estimation Examples
+### How to Use the Map
+- Read the overview first for context
+- Use directory structure to navigate
+- Reference component descriptions when editing
+- Update map after major changes
 
-**Small project (50 files, 50K tokens):**
-- Local models: FREE
-- Claude Haiku: ~$0.04
-- Claude Sonnet: ~$0.15
-
-**Medium project (500 files, 500K tokens):**
-- Local models: FREE
-- Claude Haiku: ~$0.40
-- Claude Sonnet: ~$1.50
-
-**Large project (2000 files, 2M tokens):**
-- Local models: FREE
-- Claude Haiku: ~$1.60
-- Claude Sonnet: ~$6.00
+### When NOT to Use
+- For single-file analysis
+- Very small projects (< 10 files)
+- When you just need to read one specific file
 
 ## Troubleshooting
 
-**"Unknown model" error:**
-- Check that Ollama is running: `ollama list`
-- Or configure Claude API key in OpenClaw settings
+**"No Ollama models found"**
+- Install Ollama: `brew install ollama`
+- Pull a model: `ollama pull glm-4.7-flash`
 
-**"Out of memory" error:**
-- Reduce max_tokens_per_chunk in config.json
-- Reduce max_parallel agents
+**"Analysis timed out"**
+- Reduce `max_parallel_agents` in config
+- Large files take time - this is normal
 
-**Incomplete output:**
-- Check ~/clawtographer/.progress for last successful chunk
-- Re-run - it will resume from last checkpoint
+**"All chunks failed"**
+- Check Ollama is running: `ollama ps`
+- Check model availability: `ollama list`
+- Look in `.clawtographer_cache/` for errors
 
-## Integration with OpenClaw
+## Philosophy
 
-This skill works seamlessly with OpenClaw's model routing:
-- Respects your AGENTS.md model preferences
-- Uses cost optimization strategies
-- Follows your autonomy boundaries
-- Reports completion in your preferred format
+Clawtographer embodies the "small hardware doing big things" philosophy:
+- **Free:** No API costs, runs locally
+- **Resumable:** Caches progress, recovers from interrupts
+- **Efficient:** Parallel processing maximizes throughput
+- **Smart:** Synthesizes coherent documentation
+
+Understanding code shouldn't require expensive cloud APIs.
+
+---
+
+**Made with 🦞 for the OpenClaw community**
